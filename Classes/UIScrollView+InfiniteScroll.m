@@ -426,37 +426,10 @@ static const void *kPBInfiniteScrollStateKey = &kPBInfiniteScrollStateKey;
         [activityIndicator performSelector:@selector(startAnimating)];
     }
     
-    // Calculate indicator view inset
-    CGFloat indicatorInset = [self pb_infiniteIndicatorRowHeight];
-    
-    UIEdgeInsets contentInset = self.contentInset;
-    
-    // Make a room to accommodate indicator view
-    contentInset.bottom += indicatorInset;
-    
-    // We have to pad scroll view when content height is smaller than view bounds.
-    // This will guarantee that indicator view appears at the very bottom of scroll view.
-    CGFloat adjustedContentHeight = [self pb_clampContentSizeToFitVisibleBounds:self.contentSize];
-    CGFloat extraBottomInset = adjustedContentHeight - self.contentSize.height;
-    
-    // Add empty space padding
-    contentInset.bottom += extraBottomInset;
-    
-    // Save indicator view inset
-    state.indicatorInset = indicatorInset;
-    
-    // Save extra inset
-    state.extraBottomInset = extraBottomInset;
-    
+    state.extraBottomInset = 0;
     // Update infinite scroll state
     state.loading = YES;
-    
-    // Animate content insets
-    [self pb_setScrollViewContentInset:contentInset animated:YES completion:^(BOOL finished) {
-        if(finished) {
-            [self pb_scrollToInfiniteIndicatorIfNeeded:YES];
-        }
-    }];
+    [self pb_scrollToInfiniteIndicatorIfNeeded:YES];
 
     TRACE(@"Start animating.");
 }
@@ -481,12 +454,6 @@ static const void *kPBInfiniteScrollStateKey = &kPBInfiniteScrollStateKey;
     if([self isKindOfClass:[UITableView class]]) {
         PBForceUpdateTableViewContentSize((UITableView *)self);
     }
-    
-    // Remove row height inset
-    contentInset.bottom -= state.indicatorInset;
-    
-    // Remove extra inset added to pad infinite scroll
-    contentInset.bottom -= state.extraBottomInset;
     
     // Reset indicator view inset
     state.indicatorInset = 0;
